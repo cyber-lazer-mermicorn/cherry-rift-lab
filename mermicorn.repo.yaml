@@ -1,0 +1,32 @@
+schema_version: "1.0"
+
+id: cherry-rift-lab
+display_name: Cherry Rift Lab
+owner: cherry
+lane: gaming
+visibility: public
+status: foundation
+
+purpose:
+  problem: Turn deep Wild Rift familiarity into structured analysis and portfolio-ready content.
+  audience:
+    - Cherry
+    - gaming community / content / support roles
+    - portfolio reviewers
+
+shared_services:
+  boot: mermicorn-mega-boot
+  memory: mermicorn-memory
+  token_efficiency: mermicorn-token-saver
+  graphics: mermicorn-graphic-ai
+
+privacy:
+  public:
+    - guides
+    - sanitized analysis
+  private:
+    - personal_match_data
+
+first_proof:
+  artifact: champion-guide-plus-patch-analysis
+  status: planned
