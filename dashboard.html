@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rift Lab — Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0a0a0f; color: #e0e0e0; font-family: 'Inter', sans-serif; }
+        .red { color: #ff4444; text-shadow: 0 0 10px #ff4444; }
+        .card { background: #12121a; border: 1px solid #2a2a3a; border-radius: 12px; }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold red">Rift Lab</h1>
+                <p class="text-gray-400">Analyze → Build → Play → Record</p>
+            </div>
+            <div>
+                <input id="api-key" type="password" placeholder="API Key" class="bg-gray-800 border border-gray-600 rounded px-3 py-2 text-sm mr-2">
+                <button onclick="loadDashboard()" class="bg-red-600 hover:bg-red-700 rounded px-4 py-2 text-sm">Connect</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-4 gap-4 mb-8">
+            <div class="card p-4 text-center"><div class="text-2xl font-bold text-red-400" id="stat-champs">0</div><div class="text-gray-400 text-sm">Champions</div></div>
+            <div class="card p-4 text-center"><div class="text-2xl font-bold text-green-400" id="stat-wins">0</div><div class="text-gray-400 text-sm">Wins</div></div>
+            <div class="card p-4 text-center"><div class="text-2xl font-bold text-red-400" id="stat-losses">0</div><div class="text-gray-400 text-sm">Losses</div></div>
+            <div class="card p-4 text-center"><div class="text-2xl font-bold text-yellow-400" id="stat-wr">0%</div><div class="text-gray-400 text-sm">Win Rate</div></div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div class="card p-6">
+                <h2 class="text-xl font-bold mb-4">Add Champion</h2>
+                <div class="grid grid-cols-3 gap-3 mb-3">
+                    <input id="c-name" type="text" placeholder="Name" class="bg-gray-800 border border-gray-600 rounded px-3 py-2">
+                    <select id="c-tier" class="bg-gray-800 border border-gray-600 rounded px-3 py-2">
+                        <option>S+</option><option>S</option><option>A</option><option>B</option><option>C</option><option>D</option>
+                    </select>
+                    <input id="c-wr" type="number" placeholder="Win %" class="bg-gray-800 border border-gray-600 rounded px-3 py-2">
+                </div>
+                <button onclick="addChampion()" class="bg-red-600 hover:bg-red-700 rounded px-6 py-2 w-full">Add Champion</button>
+                <div id="champs-list" class="mt-4 space-y-2 max-h-64 overflow-auto"></div>
+            </div>
+
+            <div class="card p-6">
+                <h2 class="text-xl font-bold mb-4">Record Game</h2>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <select id="g-champ" class="bg-gray-800 border border-gray-600 rounded px-3 py-2">
+                        <option value="">Select champion</option>
+                    </select>
+                    <select id="g-result" class="bg-gray-800 border border-gray-600 rounded px-3 py-2">
+                        <option value="win">Victory</option>
+                        <option value="loss">Defeat</option>
+                    </select>
+                </div>
+                <input id="g-kda" type="text" placeholder="K/D/A (e.g. 8/2/5)" class="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 mb-3">
+                <button onclick="recordGame()" class="bg-green-600 rounded px-6 py-2 w-full">Record Game</button>
+                <div id="games-list" class="mt-4 space-y-2 max-h-64 overflow-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let apiKey = '';
+        let champions = [];
+        let wins = 0, losses = 0;
+        
+        async function api(method, path, body = null) {
+            const opts = { method, headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey } };
+            if (body) opts.body = JSON.stringify(body);
+            const res = await fetch('/api' + path, opts);
+            return res.json();
+        }
+        
+        async function loadDashboard() {
+            apiKey = document.getElementById('api-key').value;
+            const champData = await api('GET', '/champions');
+            champions = champData.champions || [];
+            document.getElementById('stat-champs').textContent = champions.length;
+            
+            const gameData = await api('GET', '/games');
+            const games = gameData.games || [];
+            wins = games.filter(g => g.result === 'win').length;
+            losses = games.filter(g => g.result === 'loss').length;
+            document.getElementById('stat-wins').textContent = wins;
+            document.getElementById('stat-losses').textContent = losses;
+            document.getElementById('stat-wr').textContent = games.length ? Math.round(wins/games.length*100) + '%' : '0%';
+            
+            document.getElementById('c-champ').innerHTML = '<option value="">Select champion</option>' + 
+                champions.map(c => `<option>${c.name}</option>`).join('');
+            
+            document.getElementById('champs-list').innerHTML = champions.map(c => 
+                `<div class="bg-gray-800 p-3 rounded flex justify-between"><span>${c.name} <span class="text-gray-400">${c.tier}</span></span><span class="text-red-400">${c.win_rate}%</span></div>`
+            ).join('');
+            
+            document.getElementById('games-list').innerHTML = games.slice(-5).reverse().map(g => 
+                `<div class="bg-gray-800 p-3 rounded flex justify-between"><span>${g.champion}</span><span class="${g.result === 'win' ? 'text-green-400' : 'text-red-400'}">${g.result} (${g.kda})</span></div>`
+            ).join('');
+        }
+        
+        async function addChampion() {
+            const name = document.getElementById('c-name').value;
+            const tier = document.getElementById('c-tier').value;
+            const win_rate = parseFloat(document.getElementById('c-wr').value);
+            await api('POST', '/champions', { name, tier, win_rate });
+            loadDashboard();
+        }
+        
+        async function recordGame() {
+            const champion = document.getElementById('g-champ').value;
+            const result = document.getElementById('g-result').value;
+            const kda = document.getElementById('g-kda').value;
+            await api('POST', '/games', { champion, result, kda, items: [] });
+            loadDashboard();
+        }
+    </script>
+</body>
+</html>
