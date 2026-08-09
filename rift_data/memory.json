@@ -4,5 +4,17 @@
     "category": "champions",
     "importance": 0.5,
     "access_count": 0
+  },
+  "champion:Zed": {
+    "key": "champion:Zed",
+    "category": "champions",
+    "importance": 0.5,
+    "access_count": 0
+  },
+  "champion:Yasuo": {
+    "key": "champion:Yasuo",
+    "category": "champions",
+    "importance": 0.5,
+    "access_count": 0
   }
 }
