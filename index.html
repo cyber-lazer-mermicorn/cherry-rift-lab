@@ -3,153 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cherry Rift Lab</title>
-    <meta name="description" content="Wild Rift passion and gaming portfolio — champion journals, patch digests, matchup notes">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <title>Cherry Rift Lab — AI Champion Guides & Meta Analysis</title>
+    <meta name="description" content="AI-powered champion guides, build optimization, and meta analysis for League of Legends.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --accent: #9B59B6;
-            --bg: #0a0a0f;
-            --surface: #12121a;
-            --card: #1a1a2e;
-            --muted: #8B8B9E;
-            --white: #fff;
+            --bg: #050508; --card: rgba(15, 15, 22, 0.7); --card-border: rgba(255,255,255,0.06);
+            --text: #f0f0f5; --muted: #6b6b80;
+            --purple: #8b5cf6; --purple-dim: rgba(139,92,246,0.1);
+            --pink: #ec4899; --blue: #3b82f6;
+            --gradient: linear-gradient(135deg, #8b5cf6, #ec4899);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
-        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--white); line-height: 1.6; }
+        body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        .bg-grid { position: fixed; inset: 0; background-image: linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px); background-size: 60px 60px; z-index: -2; }
+        .bg-glow { position: fixed; width: 500px; height: 500px; border-radius: 50%; filter: blur(150px); opacity: 0.1; z-index: -1; animation: float 20s ease-in-out infinite; }
+        .bg-glow-1 { top: -150px; left: -100px; background: var(--purple); }
+        .bg-glow-2 { bottom: -150px; right: -100px; background: var(--pink); animation-delay: -10s; }
+        @keyframes float { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(40px, 40px); } }
 
-        nav {
-            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-            padding: 1rem 2rem;
-            background: rgba(10,10,15,0.85);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            display: flex; justify-content: space-between; align-items: center;
-        }
-        .logo { font-weight: 900; font-size: 1.25rem; }
-        .nav-right { color: var(--muted); font-size: 0.8rem; }
+        nav { position: fixed; top: 0; width: 100%; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); background: rgba(5,5,8,0.85); border-bottom: 1px solid var(--card-border); z-index: 100; }
+        .logo { font-family: 'Space Grotesk'; font-size: 1.3rem; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-links { display: flex; gap: 28px; }
+        .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .nav-links a:hover { color: var(--purple); }
 
-        .hero {
-            min-height: 100vh; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; text-align: center;
-            padding: 6rem 2rem; position: relative;
-        }
-        .hero::before {
-            content: ''; position: absolute; width: 500px; height: 500px;
-            background: radial-gradient(circle, #9B59B622, transparent 70%);
-            top: -150px; right: -150px; pointer-events: none;
-        }
-        .badge {
-            display: inline-flex; align-items: center; gap: 0.5rem;
-            padding: 0.5rem 1rem; background: #9B59B615; border: 1px solid #9B59B633;
-            border-radius: 999px; font-size: 0.75rem; color: #9B59B6; margin-bottom: 1.5rem;
-        }
-        .hero h1 { font-size: clamp(2.5rem, 7vw, 5rem); font-weight: 900; line-height: 1; letter-spacing: -0.04em; margin-bottom: 1rem; }
-        .hero h1 span { color: #9B59B6; }
-        .hero p { color: var(--muted); font-size: 1.125rem; max-width: 500px; margin-bottom: 2rem; }
+        .hero { min-height: 100vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 120px 20px 80px; }
+        .hero-content { max-width: 850px; }
+        .hero-badge { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; background: var(--card); border: 1px solid var(--card-border); border-radius: 100px; font-size: 0.85rem; color: var(--purple); margin-bottom: 32px; }
+        .hero-badge::before { content: ''; width: 8px; height: 8px; background: var(--purple); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .hero h1 { font-family: 'Space Grotesk'; font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 700; line-height: 1.1; margin-bottom: 24px; }
+        .hero h1 span { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.15rem; color: var(--muted); max-width: 600px; margin: 0 auto 40px; }
+        .btn-group { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 14px 28px; border-radius: 12px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s; }
+        .btn-primary { background: var(--gradient); color: #fff; box-shadow: 0 4px 20px rgba(139,92,246,0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(139,92,246,0.4); }
+        .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--card-border); }
+        .btn-secondary:hover { border-color: var(--purple); }
 
-        .btn { padding: 1rem 2rem; border-radius: 999px; font-weight: 600; font-size: 0.875rem; text-decoration: none; border: none; cursor: pointer; transition: all 0.2s; display: inline-block; }
-        .btn-primary { background: #9B59B6; color: #0a0a0f; }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px #9B59B644; }
-        .btn-ghost { background: transparent; border: 1px solid rgba(255,255,255,0.15); color: var(--white); }
-        .btn-ghost:hover { border-color: #9B59B6; color: #9B59B6; }
+        .stats-section { max-width: 1200px; margin: 0 auto; padding: 0 20px 80px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .stat-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 28px; text-align: center; transition: all 0.3s; }
+        .stat-card:hover { border-color: var(--purple); transform: translateY(-4px); }
+        .stat-number { font-family: 'Space Grotesk'; font-size: 2.5rem; font-weight: 700; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .stat-label { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
 
-        .section { padding: 6rem 2rem; }
-        .section-header { text-align: center; margin-bottom: 4rem; }
-        .section-header h2 { font-size: 2rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.5rem; }
-        .section-header p { color: var(--muted); }
+        section { max-width: 1200px; margin: 0 auto; padding: 80px 20px; }
+        .section-header { text-align: center; margin-bottom: 60px; }
+        .section-header h2 { font-family: 'Space Grotesk'; font-size: 2.2rem; font-weight: 700; margin-bottom: 12px; }
+        .section-header p { color: var(--muted); max-width: 550px; margin: 0 auto; }
 
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto; }
-        .feature {
-            background: var(--card); padding: 2rem; border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.06); text-align: center;
-            transition: all 0.3s;
-        }
-        .feature:hover { border-color: #9B59B644; transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        .feature-icon { font-size: 2rem; margin-bottom: 1rem; }
-        .feature h3 { font-size: 1.125rem; margin-bottom: 0.5rem; }
-        .feature p { color: var(--muted); font-size: 0.875rem; }
+        .champ-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+        .champ-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 16px; padding: 24px; transition: all 0.3s; cursor: pointer; }
+        .champ-card:hover { border-color: var(--purple); transform: translateY(-4px); }
+        .champ-header { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+        .champ-avatar { width: 56px; height: 56px; border-radius: 12px; background: var(--purple-dim); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+        .champ-name { font-weight: 600; font-size: 1.1rem; }
+        .champ-role { color: var(--muted); font-size: 0.85rem; }
+        .champ-stats { display: flex; gap: 16px; }
+        .champ-stat { text-align: center; }
+        .champ-stat-value { font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.1rem; }
+        .champ-stat-label { font-size: 0.75rem; color: var(--muted); }
+        .winrate { color: var(--green); }
+        .banrate { color: var(--pink); }
 
-        .items { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; max-width: 1000px; margin: 0 auto; }
-        .item {
-            background: var(--card); padding: 1.5rem; border-radius: 16px;
-            border: 1px solid rgba(255,255,255,0.06);
-            display: flex; justify-content: space-between; align-items: center;
-            transition: all 0.3s;
-        }
-        .item:hover { border-color: #9B59B644; transform: translateY(-2px); }
-        .item-name { font-weight: 600; margin-bottom: 0.25rem; }
-        .item-meta { color: var(--muted); font-size: 0.875rem; }
-        .item-price { font-weight: 700; color: #9B59B6; font-size: 1.125rem; }
-        .tag { padding: 0.25rem 0.5rem; background: #9B59B618; border-radius: 4px; font-size: 0.65rem; color: #9B59B6; margin-left: 0.5rem; font-weight: 600; letter-spacing: 0.05em; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+        .feature-card { background: var(--card); border: 1px solid var(--card-border); border-radius: 20px; padding: 32px; transition: all 0.3s; }
+        .feature-card:hover { border-color: var(--purple); transform: translateY(-4px); }
+        .feature-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; margin-bottom: 20px; }
+        .feature-card h3 { font-size: 1.2rem; font-weight: 600; margin-bottom: 12px; }
+        .feature-card p { color: var(--muted); font-size: 0.95rem; line-height: 1.7; }
 
-        .stats { display: flex; justify-content: center; gap: 4rem; padding: 3rem 2rem; max-width: 800px; margin: 0 auto; }
-        .stat { text-align: center; }
-        .stat-value { font-size: 2rem; font-weight: 900; color: #9B59B6; }
-        .stat-label { color: var(--muted); font-size: 0.8rem; margin-top: 0.25rem; }
+        .tier-list { background: var(--card); border: 1px solid var(--card-border); border-radius: 24px; padding: 48px; margin: 60px auto; max-width: 900px; }
+        .tier-row { display: flex; gap: 12px; margin-bottom: 12px; align-items: center; }
+        .tier-badge { width: 50px; font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.2rem; text-align: center; padding: 8px; border-radius: 8px; }
+        .tier-s { background: linear-gradient(135deg, #ef4444, #f97316); color: #fff; }
+        .tier-a { background: linear-gradient(135deg, #f59e0b, #eab308); color: #000; }
+        .tier-b { background: linear-gradient(135deg, #22c55e, #10b981); color: #000; }
+        .tier-c { background: linear-gradient(135deg, #3b82f6, #6366f1); color: #fff; }
+        .tier-champs { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
+        .tier-champ { padding: 6px 12px; background: rgba(0,0,0,0.3); border-radius: 8px; font-size: 0.85rem; }
 
-        footer { padding: 4rem 2rem; border-top: 1px solid rgba(255,255,255,0.06); text-align: center; }
-        footer p { color: var(--muted); font-size: 0.875rem; }
-        footer .brand { color: #9B59B6; font-weight: 700; }
+        .pricing-section { background: var(--card); border: 1px solid var(--card-border); border-radius: 24px; padding: 60px; margin: 80px auto; max-width: 1100px; text-align: center; }
+        .pricing-section h2 { font-family: 'Space Grotesk'; font-size: 2rem; margin-bottom: 12px; }
+        .pricing-section > p { color: var(--muted); max-width: 500px; margin: 0 auto 40px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .pricing-card { background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 16px; padding: 32px; }
+        .pricing-card.featured { border-color: var(--purple); position: relative; }
+        .pricing-card.featured::after { content: 'POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 16px; background: var(--gradient); border-radius: 100px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; }
+        .pricing-card h3 { font-size: 1.1rem; margin-bottom: 6px; }
+        .pricing-card .price { font-family: 'Space Grotesk'; font-size: 2.2rem; font-weight: 700; margin: 12px 0; }
+        .pricing-card .price span { font-size: 0.9rem; color: var(--muted); font-weight: 400; }
+        .pricing-features { list-style: none; text-align: left; margin: 20px 0; }
+        .pricing-features li { padding: 7px 0; color: var(--muted); font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+        .pricing-features li::before { content: '✓'; color: var(--purple); font-weight: 700; }
 
-        @media (max-width: 768px) {
-            .stats { gap: 2rem; }
-            .features, .items { grid-template-columns: 1fr; }
-        }
+        footer { text-align: center; padding: 40px 20px; border-top: 1px solid var(--card-border); color: var(--muted); font-size: 0.85rem; }
+        footer a { color: var(--purple); text-decoration: none; }
+        @media (max-width: 768px) { nav { padding: 16px 20px; } .nav-links { display: none; } .stats-grid, .pricing-grid { grid-template-columns: 1fr; } .champ-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
     <nav>
-        <div class="logo">⚔️ Cherry Rift Lab</div>
-        <div class="nav-right">Built with 💜 by Cherry</div>
+        <div class="logo">⚔️ RIFT LAB</div>
+        <div class="nav-links">
+            <a href="#champions">Champions</a>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="https://github.com/cyber-lazer-mermicorn/cherry-rift-lab" target="_blank">GitHub</a>
+        </div>
     </nav>
 
     <section class="hero">
-        <div class="badge">⚔️ Live & Ready</div>
-        <h1><span>Cherry Rift Lab</span></h1>
-        <p>Wild Rift passion and gaming portfolio — champion journals, patch digests, matchup notes</p>
-        <div style="display:flex;gap:1rem;">
-            <a href="#features" class="btn btn-primary">Explore</a>
-            <a href="#items" class="btn btn-ghost">See Latest</a>
+        <div class="hero-content">
+            <div class="hero-badge">🎮 AI-Powered Guides</div>
+            <h1>Dominate <span>The Rift</span></h1>
+            <p>AI-generated champion guides, build optimization, matchup analysis, and patch impact reports. Climb smarter, not harder.</p>
+            <div class="btn-group">
+                <a href="#champions" class="btn btn-primary">Browse Guides</a>
+                <a href="#pricing" class="btn btn-secondary">Go Pro</a>
+            </div>
         </div>
     </section>
 
-    <section class="section" id="features">
-        <div class="section-header">
-            <h2>Capabilities</h2>
-            <p>Built for performance</p>
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-number">160+</div><div class="stat-label">Champion Guides</div></div>
+            <div class="stat-card"><div class="stat-number">2.1M</div><div class="stat-label">Data Points</div></div>
+            <div class="stat-card"><div class="stat-number">+12%</div><div class="stat-label">Avg Win Rate Boost</div></div>
+            <div class="stat-card"><div class="stat-number">Daily</div><div class="stat-label">Patch Updates</div></div>
         </div>
-        <div class="features">
-            <div class="feature"><div class="feature-icon">📊</div><h3>Champion Stats</h3><p>Win rates, builds, and matchup data</p></div>
-            <div class="feature"><div class="feature-icon">📝</div><h3>Patch Digest</h3><p>Latest patch analysis and meta shifts</p></div>
-            <div class="feature"><div class="feature-icon">🎯</div><h3>Matchup Notes</h3><p>Detailed champion vs champion guides</p></div>
-            <div class="feature"><div class="feature-icon">🏆</div><h3>Ranked Progress</h3><p>Track ranked climb and milestones</p></div>
+    </div>
+
+    <section id="champions">
+        <div class="section-header"><h2>Top Champions</h2><p>AI-optimized guides updated with every patch</p></div>
+        <div class="champ-grid">
+            <div class="champ-card">
+                <div class="champ-header"><div class="champ-avatar">⚔️</div><div><div class="champ-name">Yasuo</div><div class="champ-role">Mid / Top</div></div></div>
+                <div class="champ-stats"><div class="champ-stat"><div class="champ-stat-value winrate">52.3%</div><div class="champ-stat-label">Win Rate</div></div><div class="champ-stat"><div class="champ-stat-value banrate">45.2%</div><div class="champ-stat-label">Ban Rate</div></div><div class="champ-stat"><div class="champ-stat-value">S</div><div class="champ-stat-label">Tier</div></div></div>
+            </div>
+            <div class="champ-card">
+                <div class="champ-header"><div class="champ-avatar">🏹</div><div><div class="champ-name">Jinx</div><div class="champ-role">ADC</div></div></div>
+                <div class="champ-stats"><div class="champ-stat"><div class="champ-stat-value winrate">53.8%</div><div class="champ-stat-label">Win Rate</div></div><div class="champ-stat"><div class="champ-stat-value banrate">32.1%</div><div class="champ-stat-label">Ban Rate</div></div><div class="champ-stat"><div class="champ-stat-value">S</div><div class="champ-stat-label">Tier</div></div></div>
+            </div>
+            <div class="champ-card">
+                <div class="champ-header"><div class="champ-avatar">🛡️</div><div><div class="champ-name">Thresh</div><div class="champ-role">Support</div></div></div>
+                <div class="champ-stats"><div class="champ-stat"><div class="champ-stat-value winrate">51.9%</div><div class="champ-stat-label">Win Rate</div></div><div class="champ-stat"><div class="champ-stat-value banrate">28.7%</div><div class="champ-stat-label">Ban Rate</div></div><div class="champ-stat"><div class="champ-stat-value">A</div><div class="champ-stat-label">Tier</div></div></div>
+            </div>
         </div>
     </section>
 
-    <section class="section" id="items">
-        <div class="section-header">
-            <h2>Latest Activity</h2>
-            <p>Recent results</p>
-        </div>
-        <div class="items">
-            <div class="item"><div><div class="item-name">Ahri Guide<span class="tag">META</span></div><div class="item-meta">Mid Lane</div></div><div class="item-price">S+ Tier</div></div>
-            <div class="item"><div><div class="item-name">Jinx Build<span class="tag">PATCH 5.2</span></div><div class="item-meta">ADC</div></div><div class="item-price">A Tier</div></div>
-            <div class="item"><div><div class="item-name">Yasuo Tips<span class="tag">ADVANCED</span></div><div class="item-meta">Mid/Baron</div></div><div class="item-price">B+ Tier</div></div>
+    <section id="features">
+        <div class="section-header"><h2>Pro Features</h2><p>Everything you need to climb the ladder</p></div>
+        <div class="features-grid">
+            <div class="feature-card"><div class="feature-icon" style="background: var(--purple-dim);">📖</div><h3>AI Champion Guides</h3><p>Comprehensive guides with runes, builds, combos, and matchup tips — all generated from win rate data and pro player patterns.</p></div>
+            <div class="feature-card"><div class="feature-icon" style="background: rgba(236,72,153,0.1);">🎯</div><h3>Matchup Analysis</h3><p>Detailed matchup breakdowns. See which champions counter yours, optimal trading patterns, and power spike timings.</p></div>
+            <div class="feature-card"><div class="feature-icon" style="background: rgba(59,130,246,0.1);">📊</div><h3>Meta Reports</h3><p>Weekly meta reports with tier lists, win rate trends, and patch impact analysis. Stay ahead of the curve.</p></div>
+            <div class="feature-card"><div class="feature-icon" style="background: rgba(16,185,129,0.1);">🔮</div><h3>Patch Predictions</h3><p>AI predicts which champions will rise/fall with upcoming patches based on riot's balance history and item changes.</p></div>
+            <div class="feature-card"><div class="feature-icon" style="background: rgba(245,158,11,0.1);">🎥</div><h3>Play Analysis</h3><p>Upload your replays. AI analyzes positioning, decision-making, and suggests improvements with specific timestamps.</p></div>
+            <div class="feature-card"><div class="feature-icon" style="background: rgba(239,68,68,0.1);">🏆</div><h3>Rank Tracker</h3><p>Track your climb with detailed statistics, win streaks, champion mastery, and goal setting tools.</p></div>
         </div>
     </section>
 
-    <section class="section">
-        <div class="stats">
-            <div class="stat"><div class="stat-value">4</div><div class="stat-label">Capabilities</div></div>
-            <div class="stat"><div class="stat-value">3</div><div class="stat-label">Items Tracked</div></div>
-            <div class="stat"><div class="stat-value">99%</div><div class="stat-label">Uptime</div></div>
+    <section id="pricing" class="pricing-section">
+        <h2>Climb Faster</h2>
+        <p>Invest in your rank — it pays for itself in LP</p>
+        <div class="pricing-grid">
+            <div class="pricing-card">
+                <h3>Free</h3><p style="color: var(--muted); font-size: 0.85rem;">For casual players</p>
+                <div class="price">$0<span>/mo</span></div>
+                <ul class="pricing-features"><li>5 champion guides</li><li>Basic tier list</li><li>Patch notes summary</li><li>Community access</li></ul>
+                <a href="#champions" class="btn btn-secondary" style="width: 100%; text-align: center;">Get Started</a>
+            </div>
+            <div class="pricing-card featured">
+                <h3>Pro</h3><p style="color: var(--muted); font-size: 0.85rem;">For serious climbers</p>
+                <div class="price">$9<span>/mo</span></div>
+                <ul class="pricing-features"><li>All champion guides</li><li>Detailed matchup data</li><li>Meta reports</li><li>Patch predictions</li><li>Play analysis (3/mo)</li><li>Rank tracker</li></ul>
+                <a href="#champions" class="btn btn-primary" style="width: 100%; text-align: center;">Start Pro Trial</a>
+            </div>
+            <div class="pricing-card">
+                <h3>Coach</h3><p style="color: var(--muted); font-size: 0.85rem;">For teams/coaches</p>
+                <div class="price">$29<span>/mo</span></div>
+                <ul class="pricing-features"><li>Everything in Pro</li><li>Unlimited play analysis</li><li>Team analytics</li><li>Ban/pick optimizer</li><li>Custom reports</li><li>API access</li></ul>
+                <a href="#champions" class="btn btn-secondary" style="width: 100%; text-align: center;">Contact Us</a>
+            </div>
         </div>
     </section>
 
     <footer>
-        <p>© 2026 <span class="brand">Cherry Rift Lab</span>. All rights reserved.</p>
+        <p>© 2026 Cherry Rift Lab. All rights reserved.</p>
+        <p style="margin-top: 8px;">Built with <a href="https://vercel.com">Vercel</a> • Part of <a href="https://lazermermicorn.com">lazermermicorn.com</a></p>
     </footer>
 </body>
 </html>
